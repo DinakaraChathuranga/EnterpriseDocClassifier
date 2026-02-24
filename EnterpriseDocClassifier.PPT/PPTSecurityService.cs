@@ -10,16 +10,22 @@ namespace EnterpriseDocClassifier.PPT
 
         public static bool IsPresentationClassified(Microsoft.Office.Interop.PowerPoint.Presentation pres)
         {
+            return !string.IsNullOrEmpty(GetPresentationClassification(pres));
+        }
+
+        // NEW: Retrieves the current classification tag for UI syncing
+        public static string GetPresentationClassification(Microsoft.Office.Interop.PowerPoint.Presentation pres)
+        {
             try
             {
                 dynamic properties = pres.CustomDocumentProperties;
                 foreach (dynamic property in properties)
                 {
-                    if (property.Name == MetadataPropertyName) return true;
+                    if (property.Name == MetadataPropertyName) return property.Value;
                 }
-                return false;
+                return null;
             }
-            catch { return false; }
+            catch { return null; }
         }
 
         public static void ApplyClassification(Microsoft.Office.Interop.PowerPoint.Presentation pres, ClassificationLabel label)
@@ -40,11 +46,9 @@ namespace EnterpriseDocClassifier.PPT
 
                 if (existingShape == null)
                 {
-                    // 1. Calculate Y (Top/Bottom)
                     bool isTop = label.Marker.Placement.StartsWith("Top");
                     float yPos = isTop ? 10 : pres.PageSetup.SlideHeight - 40;
 
-                    // 2. Calculate X (Left/Center/Right)
                     float xPos = 0;
                     float width = pres.PageSetup.SlideWidth;
                     var alignment = Microsoft.Office.Interop.PowerPoint.PpParagraphAlignment.ppAlignCenter;
@@ -52,27 +56,23 @@ namespace EnterpriseDocClassifier.PPT
                     if (label.Marker.Placement.Contains("Left"))
                     {
                         alignment = Microsoft.Office.Interop.PowerPoint.PpParagraphAlignment.ppAlignLeft;
-                        xPos = 20; // Slight margin from left edge
+                        xPos = 20;
                         width -= 40;
                     }
                     else if (label.Marker.Placement.Contains("Right"))
                     {
                         alignment = Microsoft.Office.Interop.PowerPoint.PpParagraphAlignment.ppAlignRight;
-                        xPos = -20; // Slide right edge adjustment
+                        xPos = -20;
                         width -= 20;
                     }
 
                     existingShape = master.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, xPos, yPos, width, 30);
                     existingShape.Name = "DocClassifierLabel";
-
-                    // Set Alignment
                     existingShape.TextFrame.TextRange.ParagraphFormat.Alignment = alignment;
                 }
 
-                // Keep the standard text/color applying code below this exactly as it was:
                 existingShape.TextFrame.TextRange.Text = label.Marker.Text;
                 existingShape.TextFrame.TextRange.Font.Size = label.Marker.FontSize;
-
                 System.Drawing.Color sysColor = System.Drawing.ColorTranslator.FromHtml(label.Marker.FontColor);
                 existingShape.TextFrame.TextRange.Font.Color.RGB = System.Drawing.ColorTranslator.ToOle(sysColor);
             }

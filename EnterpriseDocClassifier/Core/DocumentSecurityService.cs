@@ -11,16 +11,22 @@ namespace EnterpriseDocClassifier.Core
 
         public static bool IsDocumentClassified(Document doc)
         {
+            return !string.IsNullOrEmpty(GetDocumentClassification(doc));
+        }
+
+        // NEW: Retrieves the current classification tag for UI syncing
+        public static string GetDocumentClassification(Document doc)
+        {
             try
             {
                 dynamic properties = doc.CustomDocumentProperties;
                 foreach (dynamic property in properties)
                 {
-                    if (property.Name == MetadataPropertyName) return true;
+                    if (property.Name == MetadataPropertyName) return property.Value;
                 }
-                return false;
+                return null;
             }
-            catch { return false; }
+            catch { return null; }
         }
 
         public static void ApplyClassification(Document doc, ClassificationLabel label)
@@ -31,7 +37,6 @@ namespace EnterpriseDocClassifier.Core
 
             foreach (Section section in doc.Sections)
             {
-                // Determine Header or Footer based on Placement setting
                 bool isTop = label.Marker.Placement.StartsWith("Top");
                 HeaderFooter targetArea = isTop
                     ? section.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary]
@@ -42,7 +47,6 @@ namespace EnterpriseDocClassifier.Core
                 System.Drawing.Color sysColor = System.Drawing.ColorTranslator.FromHtml(label.Marker.FontColor);
                 targetArea.Range.Font.Color = (WdColor)System.Drawing.ColorTranslator.ToOle(sysColor);
 
-                // Determine Alignment (Left, Center, Right)
                 if (label.Marker.Placement.Contains("Left"))
                     targetArea.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
                 else if (label.Marker.Placement.Contains("Right"))

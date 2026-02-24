@@ -31,9 +31,29 @@ namespace EnterpriseDocClassifier.PPT
             if (selection == null) return;
 
             var label = (ClassificationLabel)selection.Tag;
-
             var pres = Globals.ThisAddIn.Application.ActivePresentation;
             PPTSecurityService.ApplyClassification(pres, label);
+        }
+
+        // NEW: Ribbon Sync Method for PowerPoint
+        public void SyncRibbonUI(Microsoft.Office.Interop.PowerPoint.Presentation pres)
+        {
+            string currentTag = PPTSecurityService.GetPresentationClassification(pres);
+
+            if (string.IsNullOrEmpty(currentTag))
+            {
+                dropDownSensitivity.SelectedItem = null;
+                return;
+            }
+
+            foreach (RibbonDropDownItem item in dropDownSensitivity.Items)
+            {
+                if (item.Label == currentTag)
+                {
+                    dropDownSensitivity.SelectedItem = item;
+                    break;
+                }
+            }
         }
     }
 }

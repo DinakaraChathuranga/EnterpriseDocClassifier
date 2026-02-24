@@ -223,7 +223,6 @@
     </Compile>
     <Compile Include="Core\ConfigurationManager.cs" />
     <Compile Include="Core\DocumentSecurityService.cs" />
-    <Compile Include="Models\ConfigModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

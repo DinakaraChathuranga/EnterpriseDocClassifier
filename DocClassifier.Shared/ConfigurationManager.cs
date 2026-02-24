@@ -7,26 +7,50 @@ namespace EnterpriseDocClassifier.Core
 {
     public static class ConfigurationManager
     {
-        // This path is readable by everyone, but only writable by Admins/ManageEngine.
-        private static readonly string ConfigPath = @"C:\ProgramData\YourCompany\DocClassifier\config.json";
+        private static PluginConfiguration _cachedConfig;
+        private static DateTime _lastReadTime;
+        private static string _configPath;
 
         public static PluginConfiguration LoadConfig()
         {
-            // Security: Always fail-safe. If config is missing, return a safe default.
-            if (!File.Exists(ConfigPath))
+            // 1. Registry-Backed Config Path
+            if (_configPath == null)
             {
-                return new PluginConfiguration { EnforceClassification = false };
+                try
+                {
+                    // Looks for a registry key pushed by ManageEngine
+                    using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"Software\EnterpriseDLP"))
+                    {
+                        if (key != null) _configPath = key.GetValue("ConfigPath") as string;
+                    }
+                }
+                catch { }
+
+                // Fallback to local path if registry isn't set
+                if (string.IsNullOrEmpty(_configPath))
+                    _configPath = @"C:\ProgramData\YourCompany\DocClassifier\config.json";
             }
 
+            if (!File.Exists(_configPath)) return null;
+
+            // 2. Memory Caching Logic (Only read disk if file was modified)
+            DateTime lastModified = File.GetLastWriteTime(_configPath);
+            if (_cachedConfig != null && lastModified == _lastReadTime)
+            {
+                return _cachedConfig; // Return cached version instantly
+            }
+
+            // 3. Load New Config
             try
             {
-                string jsonString = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<PluginConfiguration>(jsonString);
+                string json = File.ReadAllText(_configPath);
+                _cachedConfig = JsonSerializer.Deserialize<PluginConfiguration>(json);
+                _lastReadTime = lastModified;
+                return _cachedConfig;
             }
             catch
             {
-                // In a real scenario, log this error.
-                return new PluginConfiguration { EnforceClassification = false };
+                return _cachedConfig; // If file is locked, return old cache
             }
         }
     }

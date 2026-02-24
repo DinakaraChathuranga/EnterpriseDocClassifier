@@ -4,15 +4,18 @@ namespace EnterpriseDocClassifier.Models
 {
     public class PluginConfiguration
     {
-        public bool EnforceClassification { get; set; }
-        public string CustomBlockMessage { get; set; } // This fixes the CustomBlockMessage error
+        // NEW: "None", "Warn", or "Block"
+        public string EnforcementMode { get; set; }
+        public string CustomBlockMessage { get; set; }
+        public string CustomWarnMessage { get; set; } // NEW: Message for "Warn" mode
+        public string DefaultClassificationName { get; set; }
         public List<ClassificationLabel> Classifications { get; set; }
     }
 
     public class ClassificationLabel
     {
         public string Name { get; set; }
-        public string TargetPlatform { get; set; } // This fixes the TargetPlatform error
+        public string TargetPlatform { get; set; }
         public DocumentMarker Marker { get; set; }
     }
 

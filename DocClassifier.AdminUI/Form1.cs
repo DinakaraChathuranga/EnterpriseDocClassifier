@@ -10,9 +10,8 @@ namespace DocClassifier.AdminUI
 {
     public partial class Form1 : Form
     {
-        private CheckBox chkEnforce;
-        private TextBox txtCustomMessage, txtName, txtMarkerText, txtColorHex;
-        private ComboBox cbPlatform, cbPlacement;
+        private ComboBox cbEnforcementMode, cbPlatform, cbPlacement, cbDefaultTag;
+        private TextBox txtCustomMessage, txtCustomWarnMessage, txtName, txtMarkerText, txtColorHex;
         private NumericUpDown numFontSize;
         private DataGridView dgvTags;
         private PluginConfiguration _currentConfig;
@@ -27,15 +26,12 @@ namespace DocClassifier.AdminUI
             LoadExistingConfig();
         }
 
-        // Added this empty method to fix the hidden Designer error
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
+        private void Form1_Load(object sender, EventArgs e) { }
 
         private void BuildModernUI()
         {
             this.Text = "Enterprise Data Loss Prevention - Dashboard";
-            this.Size = new Size(950, 750);
+            this.Size = new Size(950, 800);
             this.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
             this.BackColor = Color.FromArgb(243, 244, 246);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -44,20 +40,30 @@ namespace DocClassifier.AdminUI
             pnlHeader.Controls.Add(new Label { Text = "DLP Policy Management Console", ForeColor = Color.White, Font = new Font("Segoe UI Semibold", 16F), Location = new Point(20, 15), AutoSize = true });
             this.Controls.Add(pnlHeader);
 
-            Panel cardSettings = CreateCard(20, 80, 890, 120);
+            // --- SETTINGS CARD ---
+            Panel cardSettings = CreateCard(20, 80, 890, 170);
             cardSettings.Controls.Add(new Label { Text = "Global Enforcement Settings", Font = new Font("Segoe UI", 12F, FontStyle.Bold), Location = new Point(15, 10), AutoSize = true });
 
-            chkEnforce = new CheckBox { Text = "Enforce Classification (Block un-tagged saves)", Location = new Point(15, 40), AutoSize = true, Font = new Font("Segoe UI Semibold", 10F), ForeColor = Color.FromArgb(220, 38, 38) };
-            cardSettings.Controls.Add(chkEnforce);
+            cardSettings.Controls.Add(new Label { Text = "Enforcement Mode:", Location = new Point(15, 40), AutoSize = true, Font = new Font("Segoe UI Semibold", 10F) });
+            cbEnforcementMode = new ComboBox { Location = new Point(180, 37), Width = 150, DropDownStyle = ComboBoxStyle.DropDownList };
+            cbEnforcementMode.Items.AddRange(new string[] { "None", "Warn", "Block" });
+            cardSettings.Controls.Add(cbEnforcementMode);
 
             cardSettings.Controls.Add(new Label { Text = "Custom Block Message:", Location = new Point(15, 70), AutoSize = true });
-
-            // Removed PlaceholderText for full .NET Framework compatibility
             txtCustomMessage = new TextBox { Location = new Point(180, 67), Width = 680 };
             cardSettings.Controls.Add(txtCustomMessage);
+
+            cardSettings.Controls.Add(new Label { Text = "Custom Warn Message:", Location = new Point(15, 100), AutoSize = true });
+            txtCustomWarnMessage = new TextBox { Location = new Point(180, 97), Width = 680 };
+            cardSettings.Controls.Add(txtCustomWarnMessage);
+
+            cardSettings.Controls.Add(new Label { Text = "Default Tag (Auto-applied):", Location = new Point(15, 130), AutoSize = true });
+            cbDefaultTag = new ComboBox { Location = new Point(180, 127), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
+            cardSettings.Controls.Add(cbDefaultTag);
             this.Controls.Add(cardSettings);
 
-            Panel cardCreate = CreateCard(20, 220, 890, 150);
+            // --- CREATE TAG CARD ---
+            Panel cardCreate = CreateCard(20, 270, 890, 150);
             cardCreate.Controls.Add(new Label { Text = "Create New Sensitivity Tag", Font = new Font("Segoe UI", 12F, FontStyle.Bold), Location = new Point(15, 10), AutoSize = true });
 
             cardCreate.Controls.Add(new Label { Text = "Platform:", Location = new Point(15, 45), AutoSize = true });
@@ -97,8 +103,9 @@ namespace DocClassifier.AdminUI
             cardCreate.Controls.Add(btnAdd);
             this.Controls.Add(cardCreate);
 
-            Panel cardGrid = CreateCard(20, 390, 890, 230);
-            dgvTags = new DataGridView { Location = new Point(15, 15), Size = new Size(860, 200), AllowUserToAddRows = false, ReadOnly = true, SelectionMode = DataGridViewSelectionMode.FullRowSelect, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, BackgroundColor = Color.White, BorderStyle = BorderStyle.None };
+            // --- DATAGRID CARD ---
+            Panel cardGrid = CreateCard(20, 440, 890, 200);
+            dgvTags = new DataGridView { Location = new Point(15, 15), Size = new Size(860, 170), AllowUserToAddRows = false, ReadOnly = true, SelectionMode = DataGridViewSelectionMode.FullRowSelect, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, BackgroundColor = Color.White, BorderStyle = BorderStyle.None };
             dgvTags.Columns.Add("Platform", "Target Platform");
             dgvTags.Columns.Add("Name", "Tag Name");
             dgvTags.Columns.Add("Text", "Watermark Text");
@@ -108,11 +115,11 @@ namespace DocClassifier.AdminUI
             cardGrid.Controls.Add(dgvTags);
             this.Controls.Add(cardGrid);
 
-            Button btnRemove = CreateFlatButton("Remove Selected Tag", 20, 640, 180, Color.FromArgb(220, 38, 38));
+            Button btnRemove = CreateFlatButton("Remove Selected Tag", 20, 660, 180, Color.FromArgb(220, 38, 38));
             btnRemove.Click += BtnRemove_Click;
             this.Controls.Add(btnRemove);
 
-            Button btnSave = CreateFlatButton("Push Enterprise Policy", 660, 635, 250, Color.FromArgb(16, 185, 129));
+            Button btnSave = CreateFlatButton("Push Enterprise Policy", 660, 655, 250, Color.FromArgb(16, 185, 129));
             btnSave.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnSave.Height = 45;
             btnSave.Click += BtnSave_Click;
@@ -140,16 +147,31 @@ namespace DocClassifier.AdminUI
 
             if (_currentConfig.Classifications == null) _currentConfig.Classifications = new List<ClassificationLabel>();
 
-            chkEnforce.Checked = _currentConfig.EnforceClassification;
+            if (string.IsNullOrEmpty(_currentConfig.EnforcementMode)) _currentConfig.EnforcementMode = "None";
+
+            cbEnforcementMode.SelectedItem = _currentConfig.EnforcementMode;
             txtCustomMessage.Text = _currentConfig.CustomBlockMessage ?? "";
+            txtCustomWarnMessage.Text = _currentConfig.CustomWarnMessage ?? "";
+
             RefreshGrid();
         }
 
         private void RefreshGrid()
         {
             dgvTags.Rows.Clear();
+            cbDefaultTag.Items.Clear();
+            cbDefaultTag.Items.Add("None (Users must select manually)");
+
             foreach (var tag in _currentConfig.Classifications)
+            {
                 dgvTags.Rows.Add(tag.TargetPlatform, tag.Name, tag.Marker.Text, tag.Marker.Placement, tag.Marker.FontSize, tag.Marker.FontColor);
+                cbDefaultTag.Items.Add(tag.Name);
+            }
+
+            if (!string.IsNullOrEmpty(_currentConfig.DefaultClassificationName) && cbDefaultTag.Items.Contains(_currentConfig.DefaultClassificationName))
+                cbDefaultTag.SelectedItem = _currentConfig.DefaultClassificationName;
+            else
+                cbDefaultTag.SelectedIndex = 0;
         }
 
         private void BtnPickColor_Click(object sender, EventArgs e)
@@ -184,8 +206,10 @@ namespace DocClassifier.AdminUI
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            _currentConfig.EnforceClassification = chkEnforce.Checked;
+            _currentConfig.EnforcementMode = cbEnforcementMode.SelectedItem.ToString();
             _currentConfig.CustomBlockMessage = txtCustomMessage.Text.Trim();
+            _currentConfig.CustomWarnMessage = txtCustomWarnMessage.Text.Trim();
+            _currentConfig.DefaultClassificationName = cbDefaultTag.SelectedIndex <= 0 ? "" : cbDefaultTag.Text;
 
             try
             {
