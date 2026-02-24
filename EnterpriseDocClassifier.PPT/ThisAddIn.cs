@@ -37,6 +37,8 @@ namespace EnterpriseDocClassifier.PPT
         private void Application_PresentationBeforeSave(PowerPoint.Presentation Pres, ref bool Cancel)
         {
             var config = ConfigurationManager.LoadConfig();
+
+            // Uses new EnforcementMode
             if (config == null || string.IsNullOrEmpty(config.EnforcementMode) || config.EnforcementMode == "None") return;
 
             bool isClassified = PPTSecurityService.IsPresentationClassified(Pres);

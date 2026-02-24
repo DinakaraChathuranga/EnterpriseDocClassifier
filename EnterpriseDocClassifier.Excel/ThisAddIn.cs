@@ -9,11 +9,12 @@ namespace EnterpriseDocClassifier.Excel
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             this.Application.WorkbookBeforeSave += Application_WorkbookBeforeSave;
-            this.Application.NewWorkbook += Application_NewWorkbook;
+
+            // FIX: Explicitly cast to AppEvents_Event to remove the ambiguity error
+            ((Microsoft.Office.Interop.Excel.AppEvents_Event)this.Application).NewWorkbook += Application_NewWorkbook;
             this.Application.WorkbookActivate += Application_WorkbookActivate;
         }
 
-        // Auto-Applies the Default Tag to new blank Excel files
         private void Application_NewWorkbook(Microsoft.Office.Interop.Excel.Workbook Wb)
         {
             var config = ConfigurationManager.LoadConfig();
@@ -29,13 +30,11 @@ namespace EnterpriseDocClassifier.Excel
             }
         }
 
-        // Syncs Ribbon when switching between different open Excel files
         private void Application_WorkbookActivate(Microsoft.Office.Interop.Excel.Workbook Wb)
         {
             Globals.Ribbons.ExcelClassificationRibbon.SyncRibbonUI(Wb);
         }
 
-        // Handles the "Warn" vs "Block" logic when saving
         private void Application_WorkbookBeforeSave(Microsoft.Office.Interop.Excel.Workbook Wb, bool SaveAsUI, ref bool Cancel)
         {
             var config = ConfigurationManager.LoadConfig();
@@ -69,7 +68,9 @@ namespace EnterpriseDocClassifier.Excel
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
             this.Application.WorkbookBeforeSave -= Application_WorkbookBeforeSave;
-            this.Application.NewWorkbook -= Application_NewWorkbook;
+
+            // FIX: Explicitly cast for cleanup
+            ((Microsoft.Office.Interop.Excel.AppEvents_Event)this.Application).NewWorkbook -= Application_NewWorkbook;
             this.Application.WorkbookActivate -= Application_WorkbookActivate;
         }
 
