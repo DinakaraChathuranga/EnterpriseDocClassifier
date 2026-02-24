@@ -14,19 +14,17 @@ namespace EnterpriseDocClassifier.PPT
         private void Application_PresentationBeforeSave(Microsoft.Office.Interop.PowerPoint.Presentation Pres, ref bool Cancel)
         {
             var config = ConfigurationManager.LoadConfig();
-
             if (config == null || !config.EnforceClassification) return;
 
             bool isClassified = PPTSecurityService.IsPresentationClassified(Pres);
 
             if (!isClassified)
             {
-                MessageBox.Show(
-                    "Organization Policy: You must select a Document Sensitivity Level from the Ribbon before saving.",
-                    "Data Loss Prevention Block",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                string msg = string.IsNullOrWhiteSpace(config.CustomBlockMessage)
+                    ? "Organization Policy: You must select a Sensitivity Level before saving."
+                    : config.CustomBlockMessage;
 
+                MessageBox.Show(msg, "Data Loss Prevention Block", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Cancel = true;
             }
         }

@@ -14,10 +14,13 @@ namespace EnterpriseDocClassifier.PPT
             {
                 foreach (var label in config.Classifications)
                 {
-                    RibbonDropDownItem item = this.Factory.CreateRibbonDropDownItem();
-                    item.Label = label.Name;
-                    item.Tag = label;
-                    dropDownSensitivity.Items.Add(item);
+                    if (label.TargetPlatform == "All" || label.TargetPlatform == "PowerPoint")
+                    {
+                        RibbonDropDownItem item = this.Factory.CreateRibbonDropDownItem();
+                        item.Label = label.Name;
+                        item.Tag = label;
+                        dropDownSensitivity.Items.Add(item);
+                    }
                 }
             }
         }

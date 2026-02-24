@@ -9,41 +9,30 @@ namespace EnterpriseDocClassifier
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            // Hook into the Word Application's "BeforeSave" event as soon as the plugin loads
             this.Application.DocumentBeforeSave += Application_DocumentBeforeSave;
         }
 
         private void Application_DocumentBeforeSave(Word.Document Doc, ref bool SaveAsUI, ref bool Cancel)
         {
-            // 1. Load the current security policy
             var config = ConfigurationManager.LoadConfig();
+            if (config == null || !config.EnforceClassification) return;
 
-            // If enforcement is disabled in the config, let them save normally
-            if (config == null || !config.EnforceClassification)
-            {
-                return;
-            }
-
-            // 2. Check if the document has the required classification metadata
             bool isClassified = DocumentSecurityService.IsDocumentClassified(Doc);
 
-            // 3. If it is NOT classified, block the save
             if (!isClassified)
             {
-                MessageBox.Show(
-                    "Organization Policy: You must select a Document Sensitivity Level from the Ribbon before saving.",
-                    "Data Loss Prevention Block",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                // Custom Error Message implementation
+                string msg = string.IsNullOrWhiteSpace(config.CustomBlockMessage)
+                    ? "Organization Policy: You must select a Sensitivity Level before saving."
+                    : config.CustomBlockMessage;
 
-                // This is the critical command that stops Word from actually saving the file
+                MessageBox.Show(msg, "Data Loss Prevention Block", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Cancel = true;
             }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
-            // Clean up the event listener when Word closes to prevent memory issues
             this.Application.DocumentBeforeSave -= Application_DocumentBeforeSave;
         }
 

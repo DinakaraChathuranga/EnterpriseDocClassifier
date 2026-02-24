@@ -11,24 +11,21 @@ namespace EnterpriseDocClassifier.Excel
             this.Application.WorkbookBeforeSave += Application_WorkbookBeforeSave;
         }
 
-        // The Delegate Error is fixed by fully spelling out the Microsoft path here
         private void Application_WorkbookBeforeSave(Microsoft.Office.Interop.Excel.Workbook Wb, bool SaveAsUI, ref bool Cancel)
         {
             var config = ConfigurationManager.LoadConfig();
-
             if (config == null || !config.EnforceClassification) return;
 
             bool isClassified = ExcelSecurityService.IsWorkbookClassified(Wb);
 
             if (!isClassified)
             {
-                MessageBox.Show(
-                    "Organization Policy: You must select a Document Sensitivity Level from the Ribbon before saving.",
-                    "Data Loss Prevention Block",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                string msg = string.IsNullOrWhiteSpace(config.CustomBlockMessage)
+                    ? "Organization Policy: You must select a Sensitivity Level before saving."
+                    : config.CustomBlockMessage;
 
-                Cancel = true; // Blocks the Excel save
+                MessageBox.Show(msg, "Data Loss Prevention Block", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Cancel = true;
             }
         }
 

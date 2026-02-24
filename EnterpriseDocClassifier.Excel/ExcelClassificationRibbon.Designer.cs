@@ -60,6 +60,7 @@
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion

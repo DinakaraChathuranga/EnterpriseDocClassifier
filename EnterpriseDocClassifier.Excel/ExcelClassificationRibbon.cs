@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Office.Tools.Ribbon;
 using EnterpriseDocClassifier.Models;
-using EnterpriseDocClassifier.Core; // Connects to the Shared Brain
+using EnterpriseDocClassifier.Core;
 
 namespace EnterpriseDocClassifier.Excel
 {
@@ -15,10 +15,13 @@ namespace EnterpriseDocClassifier.Excel
             {
                 foreach (var label in config.Classifications)
                 {
-                    RibbonDropDownItem item = this.Factory.CreateRibbonDropDownItem();
-                    item.Label = label.Name;
-                    item.Tag = label;
-                    dropDownSensitivity.Items.Add(item);
+                    if (label.TargetPlatform == "All" || label.TargetPlatform == "Excel")
+                    {
+                        RibbonDropDownItem item = this.Factory.CreateRibbonDropDownItem();
+                        item.Label = label.Name;
+                        item.Tag = label;
+                        dropDownSensitivity.Items.Add(item);
+                    }
                 }
             }
         }
