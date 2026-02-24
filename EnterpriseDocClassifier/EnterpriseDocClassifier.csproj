@@ -221,7 +221,6 @@
     <Compile Include="ClassificationRibbon.Designer.cs">
       <DependentUpon>ClassificationRibbon.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\ConfigurationManager.cs" />
     <Compile Include="Core\DocumentSecurityService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
