@@ -1,13 +1,12 @@
-﻿using System;
-using Microsoft.Office.Tools.Ribbon;
+﻿using Microsoft.Office.Tools.Ribbon;
 using EnterpriseDocClassifier.Models;
-using EnterpriseDocClassifier.Core; // Connects to the Shared Brain
+using EnterpriseDocClassifier.Core;
 
-namespace EnterpriseDocClassifier.Excel
+namespace EnterpriseDocClassifier.PPT
 {
-    public partial class ExcelClassificationRibbon
+    public partial class PPTClassificationRibbon
     {
-        private void ExcelClassificationRibbon_Load(object sender, RibbonUIEventArgs e)
+        private void PPTClassificationRibbon_Load(object sender, RibbonUIEventArgs e)
         {
             var config = ConfigurationManager.LoadConfig();
 
@@ -30,8 +29,8 @@ namespace EnterpriseDocClassifier.Excel
 
             var label = (ClassificationLabel)selection.Tag;
 
-            var wb = Globals.ThisAddIn.Application.ActiveWorkbook;
-            ExcelSecurityService.ApplyClassification(wb, label);
+            var pres = Globals.ThisAddIn.Application.ActivePresentation;
+            PPTSecurityService.ApplyClassification(pres, label);
         }
     }
 }

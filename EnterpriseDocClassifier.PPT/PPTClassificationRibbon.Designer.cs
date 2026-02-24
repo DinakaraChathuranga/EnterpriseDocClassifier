@@ -1,15 +1,22 @@
-﻿namespace EnterpriseDocClassifier.Excel
+﻿namespace EnterpriseDocClassifier.PPT
 {
-    partial class ExcelClassificationRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
+    partial class PPTClassificationRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        public ExcelClassificationRibbon()
+        public PPTClassificationRibbon()
             : base(Globals.Factory.GetRibbonFactory())
         {
             InitializeComponent();
         }
 
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -21,6 +28,10 @@
 
         #region Component Designer generated code
 
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
         private void InitializeComponent()
         {
             this.tab1 = this.Factory.CreateRibbonTab();
@@ -40,7 +51,7 @@
             // group1
             // 
             this.group1.Items.Add(this.dropDownSensitivity);
-            this.group1.Label = "Classification";
+            this.group1.Label = "group1";
             this.group1.Name = "group1";
             // 
             // dropDownSensitivity
@@ -49,17 +60,18 @@
             this.dropDownSensitivity.Name = "dropDownSensitivity";
             this.dropDownSensitivity.SelectionChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.dropDownSensitivity_SelectionChanged);
             // 
-            // ExcelClassificationRibbon
+            // PPTClassificationRibbon
             // 
-            this.Name = "ExcelClassificationRibbon";
-            this.RibbonType = "Microsoft.Excel.Workbook";
+            this.Name = "PPTClassificationRibbon";
+            this.RibbonType = "Microsoft.PowerPoint.Presentation";
             this.Tabs.Add(this.tab1);
-            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.ExcelClassificationRibbon_Load);
+            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.PPTClassificationRibbon_Load);
             this.tab1.ResumeLayout(false);
             this.tab1.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -71,9 +83,9 @@
 
     partial class ThisRibbonCollection
     {
-        internal ExcelClassificationRibbon ExcelClassificationRibbon
+        internal PPTClassificationRibbon PPTClassificationRibbon
         {
-            get { return this.GetRibbon<ExcelClassificationRibbon>(); }
+            get { return this.GetRibbon<PPTClassificationRibbon>(); }
         }
     }
 }

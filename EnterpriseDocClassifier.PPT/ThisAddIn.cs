@@ -2,23 +2,22 @@
 using System.Windows.Forms;
 using EnterpriseDocClassifier.Core;
 
-namespace EnterpriseDocClassifier.Excel
+namespace EnterpriseDocClassifier.PPT
 {
     public partial class ThisAddIn
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            this.Application.WorkbookBeforeSave += Application_WorkbookBeforeSave;
+            this.Application.PresentationBeforeSave += Application_PresentationBeforeSave;
         }
 
-        // The Delegate Error is fixed by fully spelling out the Microsoft path here
-        private void Application_WorkbookBeforeSave(Microsoft.Office.Interop.Excel.Workbook Wb, bool SaveAsUI, ref bool Cancel)
+        private void Application_PresentationBeforeSave(Microsoft.Office.Interop.PowerPoint.Presentation Pres, ref bool Cancel)
         {
             var config = ConfigurationManager.LoadConfig();
 
             if (config == null || !config.EnforceClassification) return;
 
-            bool isClassified = ExcelSecurityService.IsWorkbookClassified(Wb);
+            bool isClassified = PPTSecurityService.IsPresentationClassified(Pres);
 
             if (!isClassified)
             {
@@ -28,13 +27,13 @@ namespace EnterpriseDocClassifier.Excel
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
-                Cancel = true; // Blocks the Excel save
+                Cancel = true;
             }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
-            this.Application.WorkbookBeforeSave -= Application_WorkbookBeforeSave;
+            this.Application.PresentationBeforeSave -= Application_PresentationBeforeSave;
         }
 
         #region VSTO generated code

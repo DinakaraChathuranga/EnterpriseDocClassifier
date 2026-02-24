@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Core;
-using EnterpriseDocClassifier.Models; // Accesses your shared JSON models
+using EnterpriseDocClassifier.Models;
 
 namespace EnterpriseDocClassifier.Excel
 {
@@ -9,7 +8,8 @@ namespace EnterpriseDocClassifier.Excel
     {
         private const string MetadataPropertyName = "EnterpriseSensitivityLabel";
 
-        public static bool IsWorkbookClassified(Workbook wb)
+        // Force C# to use the true Microsoft Excel Workbook type
+        public static bool IsWorkbookClassified(Microsoft.Office.Interop.Excel.Workbook wb)
         {
             try
             {
@@ -26,9 +26,10 @@ namespace EnterpriseDocClassifier.Excel
             }
         }
 
-        public static void ApplyClassification(Workbook wb, ClassificationLabel label)
+        // Force C# to use the true Microsoft Excel Workbook type
+        public static void ApplyClassification(Microsoft.Office.Interop.Excel.Workbook wb, ClassificationLabel label)
         {
-            // 1. Write the hidden Metadata Tag (Crucial for DLP)
+            // 1. Write the hidden Metadata Tag 
             dynamic properties = wb.CustomDocumentProperties;
             try
             {
@@ -39,10 +40,9 @@ namespace EnterpriseDocClassifier.Excel
                 properties.Add(MetadataPropertyName, false, MsoDocProperties.msoPropertyTypeString, label.Name);
             }
 
-            // 2. Apply Visual Marker to every sheet in the workbook
-            foreach (Worksheet sheet in wb.Worksheets)
+            // 2. Apply Visual Marker to every sheet using the true Microsoft Worksheet type
+            foreach (Microsoft.Office.Interop.Excel.Worksheet sheet in wb.Worksheets)
             {
-                // Excel requires specific formatting strings for headers (e.g., &14 for font size 14)
                 string formatCode = $"&{label.Marker.FontSize} ";
 
                 if (label.Marker.Placement == "Header")
